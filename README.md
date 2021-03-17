@@ -63,4 +63,8 @@ Even with **500** tries, this policy never managed to keep the pole upright for 
  However, in Reinforcement Learning the only guidance the agent gets is through rewards, and the rewards are typically sparse and delayed.
  ( for more information, see page 619)
 
- Tackling the problem of delay, a common strategy is to evaluate an action based on the sum of all the rewards that come after it, usually applying a **discount factor** &gamma
+ Tackling the problem of delay, a common strategy is to evaluate an action based on the sum of all the rewards that come after it, usually applying a **discount factor** y (gamma) at each step.
+
+ This sum of discounted rewards is called the *action's return*.
+
+ Consider the example; if an agent decides to right three times in a row and gets +10 reward after the first step, 0 after the second step, and finally -50 after the third step, then assuming we use a discount factor of `y=0.8`, the first actions will have a return of `10 + y x 0 + y^2 x (-50) = -22`. If the discount factor is close to 0, then future rewards won't count for much compared to immediate rewards. Conversely, if the discount factor is close to 1, then rewards far into the future will count almost as much as the immediate reward. *Typical discount factors vary from 0.9 to 0.99*. With a discount factor of 0.95, rewards 13 steps into the future count roughly for half as much as immediate rewards (since 0.95^13 ~ 0.5), while with a discount factor of 0.99, rewards 69 steps into the future count for half as much as immediate rewards. In the CartPole environment, actions have fairly short-term effects, so choosing a discount factor of 0.95 seems reasonable.

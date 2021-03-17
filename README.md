@@ -56,4 +56,4 @@ Even with **500** tries, this policy never managed to keep the pole upright for 
  model.add(tf.keras.layers.Dense(1,activation='sigmoid'))
  ```
 
- <u>**Note**</u>: If there were more than two possible actions, there would be one output neuron per action, and we would use the softmax activation function instead.
+ <ins>**Note**</ins>: If there were more than two possible actions, there would be one output neuron per action, and we would use the softmax activation function instead.

@@ -11,7 +11,7 @@ One can list all the environments possible through OpenAI gym, using;
 
 `gym.envs.registry.all()`
 
-`def basic_policy(obs):
+```def basic_policy(obs):
     angle = obs[2]
     return 0 if angle < 0 else 1
 totals = []
@@ -24,4 +24,4 @@ for episode in range(500):
         episode_rewards+=reward
         if done:
             break
-    totals.append(episode_rewards)`
+    totals.append(episode_rewards)```

@@ -57,3 +57,10 @@ Even with **500** tries, this policy never managed to keep the pole upright for 
  ```
 
  <ins>**Note**</ins>: If there were more than two possible actions, there would be one output neuron per action, and we would use the softmax activation function instead.
+
+ If we knew what the best action was at each step, we could train the neural network as usual, by minimizing the cross entropy between the estimated probability distribution and the target distribution. It would be a regular supervised learning.
+
+ However, in Reinforcement Learning the only guidance the agent gets is through rewards, and the rewards are typically sparse and delayed.
+ ( for more information, see page 619)
+
+ Tackling the problem of delay, a common strategy is to evaluate an action based on the sum of all the rewards that come after it, usually applying a **discount factor** &gamma

@@ -47,5 +47,13 @@ Even with **500** tries, this policy never managed to keep the pole upright for 
  action 1 with 30% probability.
 
  # Making the neural network:
+```
+ # Code for neural network policy:
+ n_inputs = 4 # == env.observation_space.shape[0]
+ # Creating model
+ model = tf.keras.models.Sequential()
+ model.add(tf.keras.layers.Dense(5, activation='elu', input_shape=[n_inputs]))
+ model.add(tf.keras.layers.Dense(1,activation='sigmoid'))
+ ```
 
- 
+ <u>**Note**</u>: If there were more than two possible actions, there would be one output neuron per action, and we would use the softmax activation function instead.

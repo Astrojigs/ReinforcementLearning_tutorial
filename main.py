@@ -15,4 +15,4 @@ or right(1).'''
 action = 1
 obs, reward, done, info = env.step(action=action)
 #(array([-0.00291647,  0.42505656, -0.04575379, -0.60914895]), 1.0, False, {})
-print
+print(obs)

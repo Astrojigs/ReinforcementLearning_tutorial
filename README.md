@@ -196,3 +196,7 @@ Let's walk through this code:
 <li>Next, we go through each trainable variable, and for each of them we compute the weighted mean of the gradients for that variable over all episodes and all steps, weighted by the `final_reward`</li>
 <li>Finally, we apply these mean gradients using the optimizer: the model's trainable variables will be tweaked, and hopefully the policy will be a bit better.</li>
 </ul>
+
+# Post Train:
+
+Later on after saving the model, open final.py file and run it to use the saved model to balance the pole.

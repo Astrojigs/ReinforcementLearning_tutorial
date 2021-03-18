@@ -151,3 +151,4 @@ def discount_and_normalize_rewards(all_rewards, discounted_factor):
     return [(discounted_rewards - rewards_mean)/reward_std for discount_rewards in all_discounted_rewards]
 
 ```
+Calling the `discount_rewards([10, 0, -50], discount_factor=0.8)` returns exactly what we expected in the earlier paragraph.

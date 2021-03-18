@@ -143,4 +143,4 @@ for iteration, number in zip(range(n_iterations),range(n_iterations)):
 env.close()
 
 # Save the model
-model.save('first_model_tf_agent_cartpole.h5', overwrite = True)
+# model.save('first_model_tf_agent_cartpole.h5', overwrite = True)

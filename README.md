@@ -108,8 +108,10 @@ Let's walk through this function:
 <li>Then we compute the loss using the given loss function, and we use the tape to compute the gradient of the loss with regard to the model's trainable variables. Again, these gradients will be tweaked later, before we apply them, depending on how good or bad the action turned out to be.</li>
 <li>Finally, we play the selected action, and we return the new observation, the reward, whether the episode is ended or not, and of course the gradients that we just computed.</li>
 </ul>
+
 ## Function for playing multiple episodes:
 This function will return all the rewards and gradients for each episode and each step:
+
 ```
 def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
     all_rewards = []
@@ -126,4 +128,5 @@ def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
                 break
         all_rewards.append(current_rewards)
         all_grads.append(current_grads)
-    return all_rewards, all_grads```
+    return all_rewards, all_grads
+```

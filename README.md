@@ -67,4 +67,20 @@ Even with **500** tries, this policy never managed to keep the pole upright for 
 
  This sum of discounted rewards is called the *action's return*.
 
- Consider the example; if an agent decides to right three times in a row and gets +10 reward after the first step, 0 after the second step, and finally -50 after the third step, then assuming we use a discount factor of `y=0.8`, the first actions will have a return of `10 + y x 0 + y^2 x (-50) = -22`. If the discount factor is close to 0, then future rewards won't count for much compared to immediate rewards. Conversely, if the discount factor is close to 1, then rewards far into the future will count almost as much as the immediate reward. *Typical discount factors vary from 0.9 to 0.99*. With a discount factor of 0.95, rewards 13 steps into the future count roughly for half as much as immediate rewards (since 0.95^13 ~ 0.5), while with a discount factor of 0.99, rewards 69 steps into the future count for half as much as immediate rewards. In the CartPole environment, actions have fairly short-term effects, so choosing a discount factor of 0.95 seems reasonable.
+ Consider the example; if an agent decides to go right three times in a row and gets +10 reward after the first step, 0 after the second step, and finally -50 after the third step, then assuming we use a discount factor of `y=0.8`, the first actions will have a return of `10 + y x 0 + y^2 x (-50) = -22`. If the discount factor is close to 0, then future rewards won't count for much compared to immediate rewards. Conversely, if the discount factor is close to 1, then rewards far into the future will count almost as much as the immediate reward. *Typical discount factors vary from 0.9 to 0.99*. With a discount factor of 0.95, rewards 13 steps into the future count roughly for half as much as immediate rewards (since 0.95^13 ~ 0.5), while with a discount factor of 0.99, rewards 69 steps into the future count for half as much as immediate rewards. In the CartPole environment, actions have fairly short-term effects, so choosing a discount factor of 0.95 seems reasonable.
+
+A good actions may be followed by several bad actions that cause the pole to fall quickly, resulting in the good action getting a low return. However, if we play the game enough times, on average good actions will get a higher return than bad ones.
+
+We want to estimate how good or bad an actions is compared to other actions. This is called **action advantage**. For this we must run many episodes and normalize all the action returns(*by subtracting the mean and dividing by the standard deviation*). After that, we can reasonably assume that actions with a negative advantage were bad while actions with a positive advantage were good.
+
+**We are now ready to train our first agent using policy gradients**.
+
+# Policy Gradients:
+PG algorithms optimize the parameters of a policy by following the gradients towards higher rewards. One of the popular class of PG algorithms, called *REINFORCE* algorithms, was introduced back in 1992 by Ronald Williams. Here is one common variant.
+
+<ol>
+<li>First, let the neural network policy play the game several times, and at each step, compute the gradients that would make the chosen action even more likely-- but don't apply these gradients yet.</li>
+<li>Once you have run several episodes, compute each action's advantage(using the method described in the previous section).</li>
+<li></li>
+
+</ol>

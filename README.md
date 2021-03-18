@@ -81,6 +81,50 @@ PG algorithms optimize the parameters of a policy by following the gradients tow
 <ol>
 <li>First, let the neural network policy play the game several times, and at each step, compute the gradients that would make the chosen action even more likely-- but don't apply these gradients yet.</li>
 <li>Once you have run several episodes, compute each action's advantage(using the method described in the previous section).</li>
-<li></li>
-
+<li>If an action's advantage is positive, it means that the action was probably good, and you want to apply the gradients computed earlier to make the action even more likely to be chosen in the future. However, if the action's advantage is negative, it means the action was probably bad, and you want to apply opposite gradients to make this action slightly less likely in the future. The solution is simply to multiply each gradient vector by the corresponding action's advantage.</li>
+<li>Finally, compute the mean of all the resulting gradient vectors, and use it to perform a Gradient Descent step.</li>
 </ol>
+
+Let's use `tf.keras` to implement this algorithm. We will train the neural network policy we built earlier so that it learns to balance the pole on the cart. First, we need a function that will play one step. We will pretend for now that whatever action it takes is the right one so that we can compute the loss and its gradients (these gradients will just be saved for while, and we will modify them later depending on how good or bad the action turned out to be):
+
+```
+def play_one step(env,obs,model,loss_fn):
+    with tf.GradientTape() as tape:
+        left_proba = model(obs[np.newaxis]) #obs[np.newaxis] and obs.reshape((1,)+ obs.shape[:]) is the same
+        action = (tf.random.uniform([1,1])>left_proba)
+        y_target = tf.constant([[1.]]) - tf.cast(action,tf.float32)
+        loss = tf.reduce_mean(loss_fn(y_target,left_proba))
+    grads = tape.gradient(loss, model.trainable_variables)
+    obs, reward, done, info = env.step(int(action[0,0].numpy()))
+    return obs, reward, done, grads
+```
+
+Let's walk through this function:
+
+<ul>
+<li>Within the *GradientTape* block, we start by calling the model, giving it a single observation (we reshape the observation so it becomes a batch containing a single instance, as the model expects a batch). This outputs the probability of going left.</li>
+<li>Next, we sample a random float between 0 ad 1, and we check whether it is greater than `left_proba`. The action will be <ins>False</ins> with probability **`left_proba`** or <ins>True</ins> with **probability 1 - `left_proba`**. Once we cast this Boolean to a number, the action will be 0 (left) or 1 (right) with the appropriate probabilities.</li>
+<li>Next, we define the target probability of going left: it is 1 minus the action (cast to a float). If the action is 0 (left), then the target probability of going left will be 1. If the action is 1 (right), then the target probability will be 0</li>
+<li>Then we compute the loss using the given loss function, and we use the tape to compute the gradient of the loss with regard to the model's trainable variables. Again, these gradients will be tweaked later, before we apply them, depending on how good or bad the action turned out to be.</li>
+<li>Finally, we play the selected action, and we return the new observation, the reward, whether the episode is ended or not, and of course the gradients that we just computed.</li>
+</ul>
+## Function for playing multiple episodes:
+This function will return all the rewards and gradients for each episode and each step:
+```
+def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
+    all_rewards = []
+    all_grads = []
+    for episode in range(n_episodes):
+        current_rewards = []
+        current_grads = []
+        obs = env.reset()
+        for step in range(n_max_steps):
+            obs, reward, done, grads, = play_one_step(env, obs, model, loss_fn)
+            current_rewards.append(reward)
+            current_grads.append(grads)
+            if done:
+                break
+        all_rewards.append(current_rewards)
+        all_grads.append(current_grads)
+    return all_rewards, all_grads
+```

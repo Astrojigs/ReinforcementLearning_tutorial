@@ -62,7 +62,33 @@ model = tf.keras.models.Sequential()
 model.add(tf.keras.layers.Dense(5, activation='elu', input_shape=[n_inputs]))
 model.add(tf.keras.layers.Dense(1,activation='sigmoid'))
 
+# Function to play a step in the environment
+def play_one step(env,obs,model,loss_fn):
+    with tf.GradientTape() as tape:
+        left_proba = model(obs[np.newaxis]) #obs[np.newaxis] and obs.reshape((1,)+ obs.shape[:]) is the same
+        action = (tf.random.uniform([1,1])>left_proba)
+        y_target = tf.constant([[1.]]) - tf.cast(action,tf.float32)
+        loss = tf.reduce_mean(loss_fn(y_target,left_proba))
+    grads = tape.gradient(loss, model.trainable_variables)
+    obs, reward, done, info = env.step(int(action[0,0].numpy()))
+    return obs, reward, done, grads
 
-
+# Function to play multiple episodes:
+def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
+    all_rewards = []
+    all_grads = []
+    for episode in range(n_episodes):
+        current_rewards = []
+        current_grads = []
+        obs = env.reset()
+        for step in range(n_max_steps):
+            obs, reward, done, grads, = play_one_step(env, obs, model, loss_fn)
+            current_rewards.append(reward)
+            current_grads.append(grads)
+            if done:
+                break
+        all_rewards.append(current_rewards)
+        all_grads.append(current_grads)
+    return all_rewards, all_grads
 # call close() method to free resources
 env.close()

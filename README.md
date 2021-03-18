@@ -130,3 +130,24 @@ def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
         all_grads.append(current_grads)
     return all_rewards, all_grads
 ```
+This code returns a list of reward lists (one reward list per episode, containing one reward per step), as well as a list of gradients lists (one gradient list per episode, each containing one tuple of gradients per step and each tuple containing one gradient tensor per trainable variable).
+
+The algorithm will use the `play_multiple_episodes()` function to play the game several times (e.g., 10 times), then it will go back and look at all the rewards, discount them, and normalize them. To do thatm we need a couple more functions: the first will compute the sum of future discounted rewards at each step, and the second will normalize all these discounted rewards (returns) across many episodes by subtracting the mean and dividing by the standard deviation:
+
+```
+# Function to discount
+def discount_rewards(rewards, discount_factor):
+    discounted = np.array(rewards)
+    for step in range(len(rewards) - 2, -1, -1):
+        discounted[step]+=discounted[step + 1] * discount_factor
+    return discounted
+
+# Function to normalize rewards:
+def discount_and_normalize_rewards(all_rewards, discounted_factor):
+    all_discounted_rewards = [discount_rewards(rewards, discounted_factor) for rewards in all_rewards]
+    flat_rewards = np.concatenate(all_discounted_rewards)
+    rewards_mean = flat_rewards.mean()
+    reward_std = flat_rewards.std()
+    return [(discounted_rewards - rewards_mean)/reward_std for discount_rewards in all_discounted_rewards]
+
+```

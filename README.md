@@ -126,5 +126,4 @@ def play_multiple_episodes(env, n_episodes, n_max_steps, model, loss_fn):
                 break
         all_rewards.append(current_rewards)
         all_grads.append(current_grads)
-    return all_rewards, all_grads
-```
+    return all_rewards, all_grads```

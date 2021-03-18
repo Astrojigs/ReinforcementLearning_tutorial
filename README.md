@@ -103,7 +103,7 @@ Let's walk through this function:
 
 <ul>
 <li>Within the *GradientTape* block, we start by calling the model, giving it a single observation (we reshape the observation so it becomes a batch containing a single instance, as the model expects a batch). This outputs the probability of going left.</li>
-<li>Next, we sample a random float between 0 ad 1, and we check whether it is greater than `left_proba`. The action will be <ins>False</ins> with probability **`left_proba`** or <ins>True</ins> with **probability 1 - `left_proba`**. Once we cast this Boolean to a number, the action will be 0 (left) or 1 (right) with the appropriate probabilities.</li>
+<li>Next, we sample a random float between 0 ad 1, and we check whether it is greater than `left_proba`. The action will be <ins>False</ins> with probability `left_proba` or <ins>True</ins> with probability 1 - `left_proba`. Once we cast this Boolean to a number, the action will be 0 (left) or 1 (right) with the appropriate probabilities.</li>
 <li>Next, we define the target probability of going left: it is 1 minus the action (cast to a float). If the action is 0 (left), then the target probability of going left will be 1. If the action is 1 (right), then the target probability will be 0</li>
 <li>Then we compute the loss using the given loss function, and we use the tape to compute the gradient of the loss with regard to the model's trainable variables. Again, these gradients will be tweaked later, before we apply them, depending on how good or bad the action turned out to be.</li>
 <li>Finally, we play the selected action, and we return the new observation, the reward, whether the episode is ended or not, and of course the gradients that we just computed.</li>
@@ -152,3 +152,47 @@ def discount_and_normalize_rewards(all_rewards, discounted_factor):
 
 ```
 Calling the `discount_rewards([10, 0, -50], discount_factor=0.8)` returns exactly what we expected in the earlier paragraph.
+
+## Hyperparameters
+Let's define the hyperparameters. we will run 150 training iterations, playing 10 episodes per iteration, each episode will last at most 200 steps. We will use a discount factor of 0.95:
+
+```
+n_iterations = 150
+n_episodes_per_update = 10
+n_max_steps = 200
+discount_factor = 0.95
+```
+
+### Optmizer and loss function
+
+```
+# Optmizer
+optmizer = tf.keras.optimizers.Adam(lr=0.01)
+# Loss
+loss_fn = tf.keras.losses.binary_crossentropy
+```
+
+# Training loop
+```
+for iteration, number in zip(range(n_iterations),range(n_iterations)):
+    all_rewards, all_grads = play_multiple_episodes(env, n_episodes_per_update, n_max_steps, model, loss_fn)
+    all_final_rewards = discount_and_normalize_rewards(all_rewards, discount_factor)
+
+    all_mean_grads = []
+    for var_index in range(len(model.trainable_variables)):
+        mean_grads = tf.reduce_mean(
+        [final_reward * all_grads[episode_index][step][var_index]
+        for episode_index, final_rewards in enumerate(all_final_rewards)
+        for step, final_reward in enumerate(final_rewards)], axis=0)
+
+        all_mean_grads.append(mean_grads)
+    optmizer.apply_gradients(zip(all_mean_grads, model.trainable_variables))
+    print(number)
+```
+Let's walk through this code:
+<ul>
+<li>At each training iteration, this loop calls the `play_multiple_episodes()` function, which plays the game 10 times and returns all the rewards and gradients for every episode and step.</li>
+<li>Then we go call the `discount_and_normalize_rewards()` to compute each action's normalized advantage (which in the code we call `final_reward`). This provides a measure of how good or bad each action actually was, in hindsight.</li>
+<li>Next, we go through each trainable variable, and for each of them we compute the weighted mean of the gradients for that variable over all episodes and all steps, weighted by the `final_reward`</li>
+<li>Finally, we apply these mean gradients using the optimizer: the model's trainable variables will be tweaked, and hopefully the policy will be a bit better.</li>
+</ul>
